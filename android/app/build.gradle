@@ -2,59 +2,54 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.skillcraft.academy"
-    compileSdk rootProject.ext.compileSdkVersion
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_21
-        targetCompatibility JavaVersion.VERSION_21
-    }
+    compileSdk 36
 
     defaultConfig {
-        applicationId "com.skillcraft.academy.1.0"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        applicationId "com.skillcraft.academy"
+        minSdk 24
+        targetSdk 36
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile(
-                'proguard-android.txt'
+                    'proguard-android-optimize.txt'
             ), 'proguard-rules.pro'
         }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 }
 
 repositories {
+    google()
+    mavenCentral()
     flatDir {
-        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+        dirs 'src/main/libs', 'libs'
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
-    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
-
-    implementation project(':capacitor-android')
-    implementation project(':capacitor-cordova-android-plugins')
-
-    testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation fileTree(dir: 'src/main/libs', include: ['*.jar'])
+    implementation "androidx.appcompat:appcompat:${androidxAppCompatVersion}"
+    implementation "org.apache.cordova:framework:${cordovaAndroidVersion}"
 }
 
-apply from: 'capacitor.build.gradle'
+// Cordova Gradle extensions
+apply from: 'cordova.variables.gradle'
 
-try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.exists()) {
-        apply plugin: 'com.google.gms.google-services'
-    }
-} catch (Exception e) {
-    logger.info("google-services.json not found, skipping Google services")
+for (def func : cdvPluginPostBuildExtras) {
+    func()
 }
+
