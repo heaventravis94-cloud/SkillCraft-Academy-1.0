@@ -1,44 +1,27 @@
 workflows:
-  skillcraft_android_apk:
-    name: SkillCraft Android APK
-    instance_type: mac_mini_m2
-
+  android-capacitor-workflow:
+    name: Android Capacitor Build
+    instance_type: mac_mini_m1
+    max_build_duration: 60
     environment:
-      node: 22
-      java: 21
-
+      node: latest
+      groups:
+        - google_play # Optional: if you have secret variables
     scripts:
       - name: Install dependencies
         script: |
-          npm ci
-
-      - name: Build web app (Vite)
+          npm install
+      - name: Capacitor Sync
         script: |
-          npm run build
-
-      - name: Verify dist folder exists
-        script: |
-          ls -la
-          test -f dist/index.html
-
-      - name: Install Capacitor CLI + Android
-        script: |
-          npm i -D @capacitor/cli @capacitor/android
-
-      - name: Sync Capacitor
-        script: |
+          # This links the Android project with your node_modules
           npx cap sync android
-
-      - name: Make gradlew executable (fix code 126)
-        script: |
-          chmod +x android/gradlew
-
-      - name: Build Android APK (Debug)
+      - name: Build Android APK
         script: |
           cd android
           ./gradlew assembleDebug
-
     artifacts:
-      - android/app/build/outputs/**/*.apk
-      - android/app/build/outputs/**/*.aab
-      - android/build/reports/**/*
+      - android/app/build/outputs/apk/**/*.apk
+    publishing:
+      email:
+        recipients:
+          - appmanagement.ht@gmail.com # From your screen
